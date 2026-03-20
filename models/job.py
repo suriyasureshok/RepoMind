@@ -1,0 +1,2 @@
+"""Pydantic model: job (placeholder)."""
+

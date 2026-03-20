@@ -1,0 +1,2 @@
+"""Keyword search service (placeholder)."""
+

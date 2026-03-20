@@ -1,0 +1,2 @@
+"""Storage worker (placeholder)."""
+
