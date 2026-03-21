@@ -199,11 +199,12 @@ Avoid naming modules after Python standard libraries to prevent import conflicts
 
 ```mermaid
 flowchart LR
-    A[User Request] --> B[Task Creation]
-    B --> C[Serialization]
-    C --> D[Redis Queue]
-    D --> E[Worker (Future)]
-    E --> F[Next Stage Task]
+    A[User Request] -->|create| B[Task Creation]
+    B -->|pickle/dill| C[Serialization]
+    C -->|enqueue| D[(Redis Queue)]
+    D -->|dequeue| E[Worker Future]
+    E -->|process| F[Next Stage Task]
+    F -->|chain| G[Continue Pipeline]
 ```
 
 ---
