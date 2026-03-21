@@ -1,2 +1,0 @@
-"""Queue manager abstraction (placeholder)."""
-

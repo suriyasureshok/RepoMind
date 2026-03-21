@@ -1,2 +1,5 @@
-"""Core config package."""
+# core/config/__init__.py
 
+from .settings import settings
+
+__all__ = ["settings"]

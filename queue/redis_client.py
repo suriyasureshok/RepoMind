@@ -1,2 +1,0 @@
-"""Redis client abstraction (placeholder)."""
-
