@@ -11,4 +11,5 @@ async def test():
     result = await qm.pop_task("test_queue")
     print(result)
 
-asyncio.run(test())
+if __name__ == "__main__":
+    asyncio.run(test())

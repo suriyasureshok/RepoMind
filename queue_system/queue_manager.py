@@ -1,4 +1,4 @@
-# queue/queue_manager.py
+# queue_system/queue_manager.py
 
 import asyncio
 from typing import Optional
@@ -40,15 +40,15 @@ class QueueManager:
     async def queue_size(self, queue_name: str) -> int:
         return await self.redis.llen(queue_name)
     
-    # Bounded push (for embedding queue)
-    async def push_task_bounded(self, queue_name: str, task: Task):
+    # Bounded push for embedding queue with backpressure
+    async def push_task_bounded_for_embedding_queue(self, task: Task):
         while True:
-            size = await self.queue_size(queue_name)
+            size = await self.queue_size(EMBEDDING_QUEUE)
 
-            if queue_name == EMBEDDING_QUEUE and size >= EMBEDDING_QUEUE_MAX_SIZE:
+            if size >= EMBEDDING_QUEUE_MAX_SIZE:
                 await asyncio.sleep(0.5)  # backpressure wait
             else:
-                await self.push_task(queue_name, task)
+                await self.push_task(EMBEDDING_QUEUE, task)
                 break
 
     # Dead Letter Queue

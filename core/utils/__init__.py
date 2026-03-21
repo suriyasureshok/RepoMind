@@ -1,5 +1,4 @@
-# core/utils/serializer.py
-
+# core/utils/__init__.py
 from .serializer import (
     serialize_task,
     deserialize_task,

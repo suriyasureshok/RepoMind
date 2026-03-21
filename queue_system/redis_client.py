@@ -1,5 +1,4 @@
-# queue/redis_client.py
-
+# queue_system/redis_client.py
 import redis.asyncio as redis
 
 from core.config import settings 

@@ -1,4 +1,4 @@
-# core/cpnstants/queues.py
+# core/constants/queues.py
 
 # Queue Names
 

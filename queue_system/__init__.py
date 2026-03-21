@@ -1,5 +1,4 @@
-# queue/__init__.py
-
+# queue_system/__init__.py
 from .queue_manager import QueueManager
 from .redis_client import RedisClient
 
