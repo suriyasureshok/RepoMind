@@ -14,6 +14,7 @@ from .exceptions import (
     WorkspaceError,
     WorkerError,
     JobNotFoundError,
+    JobNotCancellableError,
 )
 
 
@@ -45,4 +46,5 @@ __all__ = [
     "WorkspaceError",
     "WorkerError",
     "JobNotFoundError",
+    "JobNotCancellableError",
 ]

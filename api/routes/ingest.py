@@ -18,18 +18,24 @@ job_store = JobStore()
 @router.post("/", response_model=IngestResponse)
 async def ingest_repo(request: IngestRequest):
     job_id = str(uuid4())
+    task = Task(
+        job_id=job_id,
+        stage=Stage.FETCH,
+        payload={"repo_url": str(request.repo_url)}
+    )
 
     try:
         await job_store.set_status(job_id, "PENDING")
-
-        task = Task(
-            job_id=job_id,
-            stage=Stage.FETCH,
-            payload={"repo_url": str(request.repo_url)}
-        )
-
         await queue.push_task(FETCH_QUEUE, task)
-    except (JobStoreError, QueueError):
+    except QueueError as exc:
+        try:
+            await job_store.set_status(job_id, "FAILED")
+        except JobStoreError as cleanup_exc:
+            raise JobStoreError(
+                f"Failed to mark job {job_id} as FAILED after queue error: {cleanup_exc}"
+            ) from exc
+        raise exc
+    except JobStoreError:
         raise
 
     return IngestResponse(job_id=job_id, status="PENDING")

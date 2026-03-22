@@ -13,6 +13,11 @@ class ChunkWorker(BaseWorker):
     def __init__(self):
         super().__init__(queue_name="chunk_queue")
 
+    @staticmethod
+    def _read_file_sync(file_path: str) -> str:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            return f.read()
+
     async def process_task(self, task: Task):
         files = task.payload.get("files")
         if files is None:
@@ -23,8 +28,7 @@ class ChunkWorker(BaseWorker):
                 break
 
             try:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                    content = f.read()
+                content = await asyncio.to_thread(self._read_file_sync, file_path)
 
                 chunk = content[:1000]  # simple chunk (for now)
 

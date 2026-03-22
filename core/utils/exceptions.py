@@ -33,3 +33,11 @@ class WorkerError(RepoMindError):
 class JobNotFoundError(NotFoundError):
     def __init__(self, job_id: str):
         super().__init__(f"Job not found: {job_id}")
+
+
+class JobNotCancellableError(RepoMindError):
+    def __init__(self, job_id: str, status: str):
+        super().__init__(
+            f"Job {job_id} is not cancellable from state {status}",
+            status_code=409,
+        )

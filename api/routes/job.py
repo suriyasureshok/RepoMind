@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from core.utils import JobStore, JobNotFoundError
+from core.utils import JobStore
 from api.controllers import JobStatusResponse
 
 router = APIRouter(prefix="/job", tags=["Job"])
@@ -22,11 +22,6 @@ async def get_status(job_id: str):
 
 @router.post("/{job_id}/cancel")
 async def cancel_job(job_id: str):
-    status = await job_store.get_status(job_id)
-
-    if status is None:
-        raise JobNotFoundError(job_id)
-
-    await job_store.set_status(job_id, "CANCELLED")
+    await job_store.cancel_if_cancellable(job_id)
 
     return {"message": "Job cancelled"}

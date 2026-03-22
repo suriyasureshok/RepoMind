@@ -1,5 +1,7 @@
 # workers/fetch_worker.py
 
+import asyncio
+
 from .base_worker import BaseWorker
 from models import Task, Stage
 from core.utils import WorkspaceManager, WorkerError
@@ -18,7 +20,7 @@ class FetchWorker(BaseWorker):
             raise WorkerError(f"Task {task.task_id} missing repo_url")
 
         try:
-            repo_path = self.workspace.clone_repo(repo_url, task.job_id)
+            repo_path = await asyncio.to_thread(self.workspace.clone_repo, repo_url, task.job_id)
         except Exception as exc:
             raise WorkerError(f"Failed to fetch repository for task {task.task_id}: {exc}") from exc
 

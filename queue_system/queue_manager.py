@@ -69,6 +69,8 @@ class QueueManager:
     
     # Bounded push for embedding queue with backpressure
     async def push_task_bounded_for_embedding_queue(self, task: Task):
+        pushed = False
+
         while not shutdown_manager.is_shutdown_requested():
             size = await self.queue_size(EMBEDDING_QUEUE)
 
@@ -77,9 +79,10 @@ class QueueManager:
                 await asyncio.sleep(0.5)  # backpressure wait
             else:
                 await self.push_task(EMBEDDING_QUEUE, task)
+                pushed = True
                 break
 
-        if shutdown_manager.is_shutdown_requested():
+        if not pushed and shutdown_manager.is_shutdown_requested():
             logger.warning("Skipping bounded push because shutdown is in progress")
 
     # Dead Letter Queue

@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import signal
 import threading
 from collections.abc import Awaitable, Callable
@@ -12,6 +13,7 @@ CleanupHook = Callable[[], Awaitable[None] | None]
 class GracefulShutdownController:
     def __init__(self):
         self._shutdown_event = threading.Event()
+        self._shutdown_lock = threading.Lock()
         self._cleanup_hooks: list[tuple[str, CleanupHook]] = []
         self._signal_handlers_installed = False
         self._previous_handlers: dict[int, object] = {}
@@ -25,14 +27,17 @@ class GracefulShutdownController:
         if hasattr(signal, "SIGBREAK"):
             signals_to_handle.append(signal.SIGBREAK)
 
+        any_installed = False
+
         for sig in signals_to_handle:
             try:
                 self._previous_handlers[sig] = signal.getsignal(sig)
                 signal.signal(sig, self._make_signal_handler(sig))
+                any_installed = True
             except (OSError, RuntimeError, ValueError):
                 logger.warning(f"Unable to register signal handler for {sig}")
 
-        self._signal_handlers_installed = True
+        self._signal_handlers_installed = any_installed
 
     def _make_signal_handler(self, sig: int):
         def _handler(_signum, _frame):
@@ -48,11 +53,12 @@ class GracefulShutdownController:
         return _handler
 
     def request_shutdown(self, reason: str = "unknown"):
-        if self._shutdown_event.is_set():
-            return
+        with self._shutdown_lock:
+            if self._shutdown_event.is_set():
+                return
 
-        logger.info(f"Shutdown requested ({reason})")
-        self._shutdown_event.set()
+            logger.info(f"Shutdown requested ({reason})")
+            self._shutdown_event.set()
 
     def is_shutdown_requested(self) -> bool:
         return self._shutdown_event.is_set()
@@ -71,7 +77,7 @@ class GracefulShutdownController:
         for name, hook in self._cleanup_hooks:
             try:
                 result = hook()
-                if asyncio.iscoroutine(result):
+                if inspect.isawaitable(result):
                     await result
                 logger.info(f"Cleanup hook completed: {name}")
             except Exception as exc:

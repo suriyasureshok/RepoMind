@@ -16,7 +16,7 @@ class StorageWorker(BaseWorker):
         if not file_path:
             raise WorkerError(f"Task {task.task_id} missing storage payload")
 
-        logger.info(f"Stored embedding for {file_path}")
+        logger.info(f"No-op storage: received embedding for {file_path}; TODO implement persistent storage")
 
         return None
 

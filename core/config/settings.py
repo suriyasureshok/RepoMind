@@ -1,8 +1,6 @@
 # core/config/settings.py
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from core.logging import logger
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -23,4 +21,3 @@ class Settings(BaseSettings):
 
 # Singleton instance
 settings = Settings()
-logger.info("Settings initialized")

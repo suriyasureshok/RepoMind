@@ -16,8 +16,8 @@ class RedisClient:
                 settings.REDIS_URL,
                 decode_responses=True
             )
-            logger.info(f"Redis client initialized for {settings.REDIS_URL}")
-        return cls._client
+            logger.info("Redis client initialized")        
+            return cls._client
 
     @classmethod
     async def close_client(cls):
