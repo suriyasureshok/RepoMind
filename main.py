@@ -1,5 +1,8 @@
+from core.logging import logger
+
+
 def main():
-    print("Hello from repomind!")
+    logger.info("Hello from repomind!")
 
 
 if __name__ == "__main__":

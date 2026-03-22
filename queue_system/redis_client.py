@@ -1,7 +1,9 @@
 # queue_system/redis_client.py
+
 import redis.asyncio as redis
 
 from core.config import settings 
+from core.logging import logger
 
 
 class RedisClient:
@@ -14,4 +16,18 @@ class RedisClient:
                 settings.REDIS_URL,
                 decode_responses=True
             )
+            logger.info(f"Redis client initialized for {settings.REDIS_URL}")
         return cls._client
+
+    @classmethod
+    async def close_client(cls):
+        if cls._client is None:
+            return
+
+        try:
+            await cls._client.aclose()
+            logger.info("Redis client closed")
+        except Exception as exc:
+            logger.error(f"Error while closing Redis client: {exc}")
+        finally:
+            cls._client = None

@@ -5,6 +5,7 @@ from typing import Dict, Any
 from uuid import uuid4
 
 from .enums import Stage
+from core.logging import logger
 
 
 class Task(BaseModel):
@@ -18,6 +19,7 @@ class Task(BaseModel):
 
     def increment_retry(self):
         self.retries += 1
+        logger.info(f"Task {self.task_id} retry incremented to {self.retries}")
 
     def can_retry(self) -> bool:
         return self.retries < self.max_retries

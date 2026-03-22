@@ -9,7 +9,6 @@ from .queues import (
     DEAD_LETTER_QUEUE,
     EMBEDDING_QUEUE_MAX_SIZE,
 )
-
 from .system import (
     MAX_RETRIES,
     FETCH_WORKERS,
@@ -18,6 +17,7 @@ from .system import (
     EMBEDDING_WORKERS,
     STORAGE_WORKERS,
 )
+
 
 __all__ = [
     # Queue Constants
@@ -30,6 +30,7 @@ __all__ = [
     "DEAD_LETTER_QUEUE",
 
     # Backpressure Threshold
+
     "EMBEDDING_QUEUE_MAX_SIZE",
 
     # System Constants

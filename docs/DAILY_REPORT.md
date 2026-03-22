@@ -300,30 +300,310 @@ repomind/
 
 ---
 
-## Next Phase — Worker Engine
+# Day 3 — Execution Layer & API Exposure
 
-### Goal
+---
 
-Enable actual execution of tasks across pipeline stages.
+## Objective
 
-### Planned Work
+Transition RepoMind from a **static infrastructure system** into an **active execution system** capable of:
 
-* Base worker class
-* Task processing loop
-* Retry mechanism
-* Cancellation handling
-* Worker implementations for each stage
+* Running ingestion pipelines end-to-end
+* Handling real repository data
+* Exposing system functionality via APIs
+
+---
+
+## Work Completed
+
+---
+
+### 1. Worker Engine Implementation (Phase 3)
+
+#### Achievements
+
+* Implemented a generic `BaseWorker` abstraction
+* Designed continuous worker loop:
+
+  * dequeue → validate → execute → enqueue next
+* Integrated retry mechanism:
+
+  * exponential backoff strategy
+  * retry limits
+  * Dead Letter Queue (DLQ) handling
+* Implemented cancellation propagation:
+
+  * workers check job status before and after execution
+
+#### Key Insight
+
+> Workers act as **stateless executors**, while orchestration is handled through queues and tasks.
+
+---
+
+### 2. Workspace Management System (Phase 4)
+
+#### Achievements
+
+* Implemented isolated workspace per job:
+
+  ```
+  /workspace/repo_<job_id>/
+  ```
+* Added repository cloning using shallow git clone
+* Built file utilities:
+
+  * recursive file listing
+  * safe file reading with encoding handling
+* Implemented robust cleanup:
+
+  * retry-based deletion (Windows-safe)
+  * read-only file handling
+  * stale workspace cleanup at startup
+
+#### Issues Encountered
+
+* File deletion failures due to Windows file locks (`PermissionError`)
+
+#### Fix
+
+* Implemented retry mechanism with delay
+* Added read-only file handling using `chmod`
+
+#### Key Insight
+
+> File system operations are **non-deterministic in real environments** and require defensive handling.
+
+---
+
+### 3. Ingestion Pipeline Implementation (Phase 5)
+
+#### Achievements
+
+Implemented full pipeline:
+
+```
+Fetch → Parse → Chunk → Embed → Store
+```
+
+---
+
+#### Fetch Worker
+
+* Clones repository into workspace
+* Initializes pipeline by pushing parse task
+
+---
+
+#### Parse Worker
+
+* Traverses repository structure
+* Extracts all file paths
+* Passes file list to chunk stage
+
+---
+
+#### Chunk Worker (Streaming)
+
+* Reads file content
+* Generates basic chunks
+* Streams tasks directly to embedding queue
+
+---
+
+#### Embedding Worker
+
+* Introduced async semaphore for rate limiting
+* Simulated embedding generation (placeholder)
+* Pushes results to storage queue
+
+---
+
+#### Storage Worker
+
+* Simulated storage layer using logging
+* Placeholder for:
+
+  * vector database
+  * metadata storage
+  * keyword indexing
+
+---
+
+#### Pipeline Characteristics
+
+* Fully asynchronous
+* Streaming execution (no batching)
+* Backpressure-aware (bounded embedding queue)
+
+#### Key Insight
+
+> The system now behaves as a **continuous data processing pipeline**, not a batch system.
+
+---
+
+### 4. API Layer Implementation (Phase 6)
+
+#### Achievements
+
+* Built FastAPI-based control layer
+* Implemented endpoints:
+
+  **POST /ingest**
+
+  * creates job
+  * enqueues fetch task
+
+  **GET /job/{job_id}**
+
+  * retrieves job status
+
+  **POST /job/{job_id}/cancel**
+
+  * triggers cancellation
+
+---
+
+#### Job State Management
+
+* Implemented Redis-based job store:
+
+  ```
+  job:{job_id}:status
+  ```
+* Enabled system-wide cancellation propagation
+
+---
+
+#### Key Insight
+
+> The system is now split into:
+>
+> * **Control Plane** → API layer
+> * **Execution Plane** → Workers + Queues
+
+---
+
+### 5. Codebase Improvements
+
+#### Additions
+
+* `graceful_shutdown.py`
+
+  * prepares system for controlled worker termination
+* `exceptions.py`
+
+  * centralized exception handling structure
+
+#### Purpose
+
+* Improve maintainability
+* Prepare for production-level robustness
+
+---
+
+## Current Architecture State
+
+---
+
+### End-to-End Ingestion Flow
+
+```mermaid
+flowchart LR
+    A[API /ingest] --> B[Fetch Worker]
+    B --> C[Parse Worker]
+    C --> D[Chunk Worker]
+    D --> E[Embedding Worker]
+    E --> F[Storage Worker]
+```
+
+---
+
+### Execution Model
+
+```mermaid
+flowchart TB
+    A[Redis Queue] --> B[Worker]
+    B --> C[Process Task]
+    C --> D{Success?}
+
+    D -->|Yes| E[Next Stage Task]
+    D -->|No| F[Retry / DLQ]
+
+    E --> A
+```
+
+---
+
+## System Capability (Current)
+
+| Capability           | Status      |
+| -------------------- | ----------- |
+| Task system          | Completed   |
+| Queue system         | Completed   |
+| Worker execution     | Completed   |
+| Ingestion pipeline   | Completed   |
+| Streaming processing | Implemented |
+| API layer            | Completed   |
+| Cancellation         | Implemented |
+| Storage layer        | Placeholder |
+| Query pipeline       | Not started |
+
+---
+
+## What Is Not Built Yet
+
+---
+
+### Query Pipeline (Next Major Step)
+
+* Hybrid retrieval (vector + keyword + metadata)
+* Reranking logic
+* Context builder
+* LLM integration and streaming
+
+---
+
+### Storage Layer
+
+* Vector database integration
+* Metadata indexing
+* Keyword search system
+
+---
+
+### Observability & Control
+
+* Job completion tracking
+* Failure analytics
+* Metrics and monitoring
 
 ---
 
 ## Final Assessment
 
-The system has successfully completed:
+RepoMind has now evolved into:
 
-> The **Infrastructure Layer of a Distributed Pipeline System**
+> A **fully functional asynchronous ingestion system with API-level control**
 
-The next phase will transition the system into:
+The system successfully demonstrates:
 
-> An **Execution Engine capable of running real pipelines**
+* Distributed task execution
+* Queue-driven architecture
+* Streaming data processing
+* Real-world system robustness
 
 ---
+
+## Next Phase
+
+### Phase 7 — Query Pipeline
+
+Focus:
+
+* Retrieval intelligence
+* LLM integration
+* User-facing query system
+
+---
+
