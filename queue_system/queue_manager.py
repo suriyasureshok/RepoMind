@@ -3,19 +3,13 @@
 import asyncio
 from typing import Optional
 
-from models import Task
-from core.constants import (
-    EMBEDDING_QUEUE, 
-    EMBEDDING_QUEUE_MAX_SIZE,
-    DEAD_LETTER_QUEUE,
-)
-from core.utils import (
-    serialize_task,
-    deserialize_task,
-    shutdown_manager,
-    QueueError,
-)
+from core.constants import (DEAD_LETTER_QUEUE, EMBEDDING_QUEUE,
+                            EMBEDDING_QUEUE_MAX_SIZE)
 from core.logging import logger
+from core.utils.serializer import (serialize_task, deserialize_task)
+from core.utils.exceptions import QueueError
+from models import Task
+
 from .redis_client import RedisClient
 
 
@@ -35,7 +29,9 @@ class QueueManager:
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            raise QueueError(f"Failed to push task {task.task_id} to {queue_name}: {exc}") from exc
+            raise QueueError(
+                f"Failed to push task {task.task_id} to {queue_name}: {exc}"
+            ) from exc
 
     # Pop task (blocking)
     async def pop_task(self, queue_name: str) -> Optional[Task]:
@@ -65,8 +61,10 @@ class QueueManager:
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            raise QueueError(f"Failed to get queue size for {queue_name}: {exc}") from exc
-    
+            raise QueueError(
+                f"Failed to get queue size for {queue_name}: {exc}"
+            ) from exc
+
     # Bounded push for embedding queue with backpressure
     async def push_task_bounded_for_embedding_queue(self, task: Task):
         pushed = False
@@ -93,7 +91,9 @@ class QueueManager:
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            raise QueueError(f"Failed to move task {task.task_id} to dead letter queue: {exc}") from exc
+            raise QueueError(
+                f"Failed to move task {task.task_id} to dead letter queue: {exc}"
+            ) from exc
 
     # Utility
     async def clear_queue(self, queue_name: str):

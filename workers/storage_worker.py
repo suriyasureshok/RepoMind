@@ -1,9 +1,10 @@
 # workers/storage_worker.py
 
-from .base_worker import BaseWorker
-from models import Task
 from core.logging import logger
 from core.utils import WorkerError
+from models import Task
+
+from .base_worker import BaseWorker
 
 
 class StorageWorker(BaseWorker):
@@ -16,7 +17,9 @@ class StorageWorker(BaseWorker):
         if not file_path:
             raise WorkerError(f"Task {task.task_id} missing storage payload")
 
-        logger.info(f"No-op storage: received embedding for {file_path}; TODO implement persistent storage")
+        logger.info(
+            f"No-op storage: received embedding for {file_path}; TODO implement persistent storage"
+        )
 
         return None
 

@@ -1,13 +1,14 @@
 # api/routes/ingest.py
 
-from fastapi import APIRouter
 from uuid import uuid4
 
-from models import Task, Stage
-from queue_system import QueueManager
-from core.utils import JobStore, JobStoreError, QueueError
+from fastapi import APIRouter
+
 from api.controllers import IngestRequest, IngestResponse
 from core.constants import FETCH_QUEUE
+from core.utils import JobStore, JobStoreError, QueueError
+from models import Stage, Task
+from queue_system import QueueManager
 
 router = APIRouter(prefix="/ingest", tags=["Ingestion"])
 
@@ -19,9 +20,7 @@ job_store = JobStore()
 async def ingest_repo(request: IngestRequest):
     job_id = str(uuid4())
     task = Task(
-        job_id=job_id,
-        stage=Stage.FETCH,
-        payload={"repo_url": str(request.repo_url)}
+        job_id=job_id, stage=Stage.FETCH, payload={"repo_url": str(request.repo_url)}
     )
 
     try:

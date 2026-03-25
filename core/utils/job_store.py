@@ -6,7 +6,8 @@ from typing import Iterable
 from redis.exceptions import WatchError
 
 from queue_system.redis_client import RedisClient
-from .exceptions import JobStoreError, JobNotFoundError, JobNotCancellableError
+
+from .exceptions import JobNotCancellableError, JobNotFoundError, JobStoreError
 
 
 class JobStore:
@@ -20,7 +21,9 @@ class JobStore:
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            raise JobStoreError(f"Failed to set status for job {job_id}: {exc}") from exc
+            raise JobStoreError(
+                f"Failed to set status for job {job_id}: {exc}"
+            ) from exc
 
     async def get_status(self, job_id: str) -> str | None:
         try:
@@ -28,7 +31,9 @@ class JobStore:
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            raise JobStoreError(f"Failed to get status for job {job_id}: {exc}") from exc
+            raise JobStoreError(
+                f"Failed to get status for job {job_id}: {exc}"
+            ) from exc
 
     async def cancel_if_cancellable(
         self,
@@ -51,7 +56,9 @@ class JobStore:
                             raise JobNotFoundError(job_id)
 
                         if isinstance(current_status, bytes):
-                            current_status = current_status.decode("utf-8", errors="replace")
+                            current_status = current_status.decode(
+                                "utf-8", errors="replace"
+                            )
 
                         if current_status not in allowed_states:
                             await pipe.reset()

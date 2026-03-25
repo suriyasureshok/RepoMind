@@ -12,6 +12,10 @@ class JobResponse(BaseModel):
     status: str
 
 
+class QueryRequest(BaseModel):
+    query: str
+
+
 class IngestResponse(JobResponse):
     pass
 

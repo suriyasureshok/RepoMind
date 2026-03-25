@@ -4,9 +4,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+
 from api.routes import router
-from core.utils import shutdown_manager, RepoMindError
 from core.logging import logger
+from core.utils import RepoMindError, shutdown_manager
 from queue_system import RedisClient
 
 

@@ -2,8 +2,8 @@
 
 import json
 
-from models import Task
 from core.logging import logger
+from models import Task
 
 
 def serialize_task(task: Task) -> str:

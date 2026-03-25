@@ -3,11 +3,10 @@
 import asyncio
 from abc import ABC, abstractmethod
 
+from core.logging import logger
+from core.utils import WorkerError, shutdown_manager
 from models import Task
 from queue_system import QueueManager
-from core.logging import logger
-from core.utils import shutdown_manager, WorkerError
-
 
 MAX_BACKOFF_SECONDS = 30
 
@@ -35,7 +34,9 @@ class BaseWorker(ABC):
                     logger.info(f"Worker task cancelled for queue: {self.queue_name}")
                     break
                 except Exception as exc:
-                    logger.exception(f"Failed to pop task from queue {self.queue_name}: {exc}")
+                    logger.exception(
+                        f"Failed to pop task from queue {self.queue_name}: {exc}"
+                    )
                     await asyncio.sleep(pop_error_backoff)
                     pop_error_backoff = min(pop_error_backoff * 2, 5.0)
                     continue
@@ -104,17 +105,21 @@ class BaseWorker(ABC):
 
     async def handle_failure(self, task: Task):
         if shutdown_manager.is_shutdown_requested():
-            logger.info(f"Skipping retry for {task.task_id} because shutdown is in progress")
+            logger.info(
+                f"Skipping retry for {task.task_id} because shutdown is in progress"
+            )
             return
 
         task.increment_retry()
 
         if task.can_retry():
-            backoff = min(2 ** task.retries, MAX_BACKOFF_SECONDS)
+            backoff = min(2**task.retries, MAX_BACKOFF_SECONDS)
             logger.info(f"Retrying task {task.task_id} in {backoff}s")
             requeue_task = asyncio.create_task(self._delayed_requeue(task, backoff))
             self._pending_requeues.add(requeue_task)
-            requeue_task.add_done_callback(lambda completed_task: self._pending_requeues.discard(completed_task))
+            requeue_task.add_done_callback(
+                lambda completed_task: self._pending_requeues.discard(completed_task)
+            )
 
         else:
             logger.error(f"Task {task.task_id} moved to DLQ")
@@ -131,7 +136,9 @@ class BaseWorker(ABC):
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            raise WorkerError(f"Failed to read cancellation status for job {task.job_id}: {exc}") from exc
+            raise WorkerError(
+                f"Failed to read cancellation status for job {task.job_id}: {exc}"
+            ) from exc
 
     @abstractmethod
     async def process_task(self, task: Task):

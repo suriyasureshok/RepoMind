@@ -1,11 +1,10 @@
 # workers/__init__.py
 
+from .chunk_worker import ChunkWorker
+from .embedding_worker import EmbeddingWorker
 from .fetch_worker import FetchWorker
 from .parse_worker import ParseWorker
-from .embedding_worker import EmbeddingWorker
 from .storage_worker import StorageWorker
-from .chunk_worker import ChunkWorker
-
 
 __all__ = [
     # Workers
@@ -13,5 +12,5 @@ __all__ = [
     "ParseWorker",
     "EmbeddingWorker",
     "StorageWorker",
-    "ChunkWorker"
+    "ChunkWorker",
 ]

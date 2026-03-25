@@ -1,3 +1,5 @@
+# core/utils/graceful_shutdown.py
+
 import asyncio
 import inspect
 import signal
@@ -5,7 +7,6 @@ import threading
 from collections.abc import Awaitable, Callable
 
 from core.logging import logger
-
 
 CleanupHook = Callable[[], Awaitable[None] | None]
 

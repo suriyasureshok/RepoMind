@@ -1,12 +1,12 @@
 # models/job.py
 
-from pydantic import BaseModel, Field
 from datetime import datetime, timezone
-from uuid import uuid4
 from typing import Literal
+from uuid import uuid4
+
+from pydantic import BaseModel, Field
 
 from core.logging import logger
-
 
 JobStatus = Literal["PENDING", "RUNNING", "FAILED", "COMPLETED", "CANCELLED"]
 

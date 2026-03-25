@@ -1,14 +1,10 @@
 import asyncio
 
-from workers import FetchWorker
-from workers import ParseWorker
-from workers import ChunkWorker
-from workers import EmbeddingWorker
-from workers import StorageWorker
-
-from models import Task, Stage
 from core.utils import shutdown_manager
+from models import Stage, Task
 from queue_system import RedisClient
+from workers import (ChunkWorker, EmbeddingWorker, FetchWorker, ParseWorker,
+                     StorageWorker)
 
 
 async def main():
@@ -29,7 +25,7 @@ async def main():
     task = Task(
         job_id="job1",
         stage=Stage.FETCH,
-        payload={"repo_url": "https://github.com/git/git"}
+        payload={"repo_url": "https://github.com/git/git"},
     )
 
     await fetch.queue.push_task("fetch_queue", task)

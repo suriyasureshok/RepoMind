@@ -2,10 +2,11 @@
 
 import asyncio
 
-from .base_worker import BaseWorker
-from models import Task, Stage
 from core.constants import STORAGE_QUEUE
 from core.utils import WorkerError
+from models import Stage, Task
+
+from .base_worker import BaseWorker
 
 
 class EmbeddingWorker(BaseWorker):
@@ -32,14 +33,10 @@ class EmbeddingWorker(BaseWorker):
                 "job_id": task.job_id,
                 "file_path": file_path,
                 "embedding": embedding,
-                "chunk": chunk
+                "chunk": chunk,
             }
 
     async def enqueue_next(self, result):
-        next_task = Task(
-            job_id=result["job_id"],
-            stage=Stage.STORE,
-            payload=result
-        )
+        next_task = Task(job_id=result["job_id"], stage=Stage.STORE, payload=result)
 
         await self.queue.push_task(STORAGE_QUEUE, next_task)

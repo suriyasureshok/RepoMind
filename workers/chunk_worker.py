@@ -2,10 +2,10 @@
 
 import asyncio
 
-from workers.base_worker import BaseWorker
-from models import Task, Stage
-from core.utils import shutdown_manager, WorkerError
 from core.logging import logger
+from core.utils import WorkerError, shutdown_manager
+from models import Stage, Task
+from workers.base_worker import BaseWorker
 
 
 class ChunkWorker(BaseWorker):
@@ -35,13 +35,11 @@ class ChunkWorker(BaseWorker):
                 chunk_payload = {
                     "job_id": task.job_id,
                     "file_path": file_path,
-                    "chunk": chunk
+                    "chunk": chunk,
                 }
 
                 chunk_task = Task(
-                    job_id=task.job_id,
-                    stage=Stage.EMBED,
-                    payload=chunk_payload
+                    job_id=task.job_id, stage=Stage.EMBED, payload=chunk_payload
                 )
 
                 await self.queue.push_task_bounded_for_embedding_queue(chunk_task)
@@ -49,7 +47,9 @@ class ChunkWorker(BaseWorker):
             except asyncio.CancelledError:
                 raise
             except OSError as exc:
-                logger.warning(f"Failed to read file for task {task.task_id} at {file_path}: {exc}")
+                logger.warning(
+                    f"Failed to read file for task {task.task_id} at {file_path}: {exc}"
+                )
                 continue
 
         return None

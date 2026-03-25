@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter
 
-from core.utils import JobStore
 from api.controllers import JobStatusResponse
+from core.utils import JobStore
 
 router = APIRouter(prefix="/job", tags=["Job"])
 

@@ -2,16 +2,16 @@
 
 import os
 import re
-import time
-import stat
 import shutil
+import stat
 import subprocess
+import time
 from pathlib import Path
 
 from core.config import settings
 from core.logging import logger
-from .exceptions import WorkspaceError
 
+from .exceptions import WorkspaceError
 
 JOB_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
 
@@ -63,7 +63,9 @@ class WorkspaceManager:
                 logger.info(f"Workspace deleted: {repo_path}")
                 return
             except PermissionError:
-                logger.warning(f"Retry {attempt + 1}: Failed to delete {repo_path}, retrying...")
+                logger.warning(
+                    f"Retry {attempt + 1}: Failed to delete {repo_path}, retrying..."
+                )
                 time.sleep(1)
 
         raise WorkspaceError(f"Failed to delete workspace after retries: {repo_path}")
@@ -87,13 +89,19 @@ class WorkspaceManager:
             return repo_path
 
         except subprocess.CalledProcessError as e:
-            stderr = e.stderr.decode("utf-8", errors="replace") if isinstance(e.stderr, bytes) else (e.stderr or "")
+            stderr = (
+                e.stderr.decode("utf-8", errors="replace")
+                if isinstance(e.stderr, bytes)
+                else (e.stderr or "")
+            )
             logger.error(f"Failed to clone repo: {stderr}")
             self.delete_workspace(job_id)
             raise WorkspaceError(f"Failed to clone repository {repo_url}") from e
         except Exception as exc:
             self.delete_workspace(job_id)
-            raise WorkspaceError(f"Unexpected clone failure for repository {repo_url}: {exc}") from exc
+            raise WorkspaceError(
+                f"Unexpected clone failure for repository {repo_url}: {exc}"
+            ) from exc
 
     def list_files(self, job_id: str):
         repo_path = self.get_repo_path(job_id)
@@ -115,7 +123,9 @@ class WorkspaceManager:
             with open(requested_path, "r", encoding="utf-8", errors="ignore") as f:
                 return f.read()
         except ValueError as exc:
-            raise WorkspaceError(f"Invalid file path outside workspace: {file_path}") from exc
+            raise WorkspaceError(
+                f"Invalid file path outside workspace: {file_path}"
+            ) from exc
         except Exception as e:
             raise WorkspaceError(f"Error reading file {file_path}: {e}") from e
 
@@ -132,4 +142,6 @@ class WorkspaceManager:
                     shutil.rmtree(folder, onerror=handle_remove_readonly)
                     logger.info(f"Removed stale workspace: {folder}")
                 except Exception as exc:
-                    raise WorkspaceError(f"Failed to cleanup stale workspace {folder}: {exc}") from exc
+                    raise WorkspaceError(
+                        f"Failed to cleanup stale workspace {folder}: {exc}"
+                    ) from exc

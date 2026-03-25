@@ -2,7 +2,7 @@
 
 import redis.asyncio as redis
 
-from core.config import settings 
+from core.config import settings
 from core.logging import logger
 
 
@@ -12,11 +12,8 @@ class RedisClient:
     @classmethod
     def get_client(cls):
         if cls._client is None:
-            cls._client = redis.from_url(
-                settings.REDIS_URL,
-                decode_responses=True
-            )
-            logger.info("Redis client initialized")        
+            cls._client = redis.from_url(settings.REDIS_URL, decode_responses=True)
+            logger.info("Redis client initialized")
             return cls._client
 
     @classmethod

@@ -1,11 +1,13 @@
 # models/task.py
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any
+from typing import Any, Dict
 from uuid import uuid4
 
-from .enums import Stage
+from pydantic import BaseModel, Field
+
 from core.logging import logger
+
+from .enums import Stage
 
 
 class Task(BaseModel):
